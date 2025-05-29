@@ -102,7 +102,7 @@ export default function LoginScreen() {
                             style={styles.logo}
                             resizeMode="contain"
                         />
-                        <Text style={styles.title}>Triangle</Text>
+                        <Text style={styles.title}>Triangl</Text>
                     </View>
 
                     <View style={styles.card}>
@@ -164,16 +164,6 @@ export default function LoginScreen() {
                                 <Text style={styles.buttonText}>Prijava</Text>
                             </TouchableOpacity>
                         )}
-                    </View>
-
-                    <View style={styles.footer}>
-                        <Text style={styles.footerText}>Zaboravljena lozinka?</Text>
-                        <TouchableOpacity
-                            onPress={() => navigation.navigate('Register')}
-                            style={styles.registerLinkContainer}
-                        >
-                            <Text style={styles.footerLink}>Izmeni lozinku</Text>
-                        </TouchableOpacity>
                     </View>
                 </LinearGradient>
             </TouchableWithoutFeedback>
