@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "my-app",
-    "slug": "my-app",
+    "name": "Triangl",
+    "slug": "Triangl",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,9 +12,12 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-      "extra": {
-          "API_URL": "https://trianglpanel.com/api"
-      },
+    "extra": {
+      "API_URL": "https://trianglpanel.com/api",
+      "eas": {
+        "projectId": "4546ba12-b737-499a-8fe9-d94c234ed15c"
+      }
+    },
     "ios": {
       "supportsTablet": true,
       "bundler": "metro"
@@ -30,6 +33,7 @@
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
-    }
+    },
+    "owner": "crni89"
   }
 }
