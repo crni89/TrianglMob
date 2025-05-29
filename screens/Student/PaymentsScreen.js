@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
     modalContainer: { backgroundColor: '#fff', width: '85%', borderRadius: 12, padding: 20 },
     modalTitle: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
     pickerWrapper: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, overflow: 'hidden', marginBottom: 24 },
-    picker: { height: 150, width: '100%' },
+    picker: { height: 300, width: '100%'},
     modalButtons: { flexDirection: 'row', justifyContent: 'space-between' },
     modalBtn: { flex: 1, paddingVertical: 12, backgroundColor: '#112E50', borderRadius: 8, alignItems: 'center', marginHorizontal: 5 },
     cancelBtn: { backgroundColor: '#888' },
