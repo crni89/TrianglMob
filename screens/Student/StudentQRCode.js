@@ -43,7 +43,7 @@ export default function StudentQRCode({ navigation, route }) {
                 <View style={tw`bg-white p-6 rounded-3xl shadow-xl items-center`}>
                     <View style={tw`bg-gray-100 p-4 rounded-xl mb-4`}>
                         <QRCode
-                            value={studentId}
+                            value={JSON.stringify({ student_id: studentId })}
                             size={250}
                             color="#112E50"
                             backgroundColor="#fff"

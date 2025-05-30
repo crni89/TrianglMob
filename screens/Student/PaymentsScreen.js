@@ -4,12 +4,9 @@ import {
     Text,
     StyleSheet,
     ScrollView,
-    Modal,
-    TouchableOpacity,
-    Pressable,
     RefreshControl,
+    Pressable,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import api from '../../api';
@@ -22,71 +19,75 @@ const FILTER_LABELS = {
 };
 
 const PAYMENT_TYPE = {
-    'cash': "gotovina",
-    'card': "kartica"
-}
+    cash: 'gotovina',
+    card: 'kartica',
+};
 
-export default function PaymentsScreen({ navigation, route }) {
+const FilterButton = ({ label, status, active, onPress }) => (
+    <Pressable
+        onPress={() => onPress(status)}
+        style={[
+            styles.filterBtn,
+            active === status && styles.filterBtnActive,
+        ]}
+    >
+        <Text
+            style={[
+                styles.filterBtnText,
+                active === status && styles.filterBtnTextActive,
+            ]}
+        >
+            {label}
+        </Text>
+    </Pressable>
+);
+
+export default function PaymentsScreen({ route }) {
     const student = route.params.profile;
-    const [enrollments, setEnrollments] = useState([]);
-    const [filteredEnrollments, setFilteredEnrollments] = useState([]);
-    const [filterModalVisible, setFilterModalVisible] = useState(false);
-    const [selectedType, setSelectedType] = useState('');
-    const [activeFilter, setActiveFilter] = useState('');
-    const [refreshing, setRefreshing] = useState(false);
-
     const studentId = student.id;
 
-    useEffect(() => {
-        fetchEnrollments();
-    }, []);
-
-    const applyFilter = () => {
-        setActiveFilter(selectedType);
-        setFilterModalVisible(false);
-        setFilteredEnrollments(
-            selectedType
-                ? enrollments.filter(e => e.course?.type === selectedType)
-                : enrollments
-        );
-    };
+    const [enrollments, setEnrollments] = useState([]);
+    const [filtered, setFiltered] = useState([]);
+    const [filterStatus, setFilterStatus] = useState('');
+    const [refreshing, setRefreshing] = useState(false);
 
     const fetchEnrollments = async () => {
         try {
             const res = await api.get(`/student/${studentId}/payments`);
             const data = res.data.enrollments || [];
             setEnrollments(data);
-            setFilteredEnrollments(
-                activeFilter
-                    ? data.filter(e => e.course?.type === activeFilter)
-                    : data
-            );
+            applyFilter(filterStatus, data);
         } catch (err) {
             console.error('Greška pri učitavanju podataka:', err);
+        } finally {
+            setRefreshing(false);
         }
     };
 
-    const handleRefresh = async () => {
+    useEffect(() => {
+        fetchEnrollments();
+    }, []);
+
+    const onRefresh = () => {
         setRefreshing(true);
-        await fetchEnrollments();
-        setRefreshing(false);
+        fetchEnrollments();
     };
 
-    // Summary calculations based on actual payments
-    const totalCost = filteredEnrollments.reduce(
-        (sum, e) => sum + parseFloat(e.price),
-        0
-    );
-    const totalPaid = filteredEnrollments.reduce(
-        (sum, e) => {
-            const paid = e.payments?.reduce(
-                (s, p) => s + parseFloat(p.amount),
-                0
-            );
-            return sum + paid;
-        },
-        0
-    );
+    const applyFilter = (status, data = enrollments) => {
+        setFilterStatus(status);
+        if (status === '') {
+            setFiltered(data);
+        } else {
+            setFiltered(data.filter(e => e.course?.type === status));
+        }
+    };
+
+    // Summary izračuni
+    const totalCost = filtered.reduce((sum, e) => sum + parseFloat(e.price), 0);
+    const totalPaid = filtered.reduce((sum, e) => {
+        const paid = e.payments?.reduce((s, p) => s + parseFloat(p.amount), 0) || 0;
+        return sum + paid;
+    }, 0);
     const totalDebt = totalCost - totalPaid;
 
     return (
@@ -94,12 +95,12 @@ export default function PaymentsScreen({ navigation, route }) {
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
                 refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                 }
             >
                 {/* Summary */}
                 <LinearGradient
-                    colors={['#4e6a8a', '#4e6a8a', '#4e6a8a']}
+                    colors={['#4e6a8a', '#4e6a8a']}
                     style={styles.summaryContainer}
                 >
                     <View style={styles.summaryRow}>
@@ -108,15 +109,11 @@ export default function PaymentsScreen({ navigation, route }) {
                     </View>
                     <View style={styles.summaryRow}>
                         <Text style={styles.summaryText}>Cena svih paketa:</Text>
-                        <Text style={styles.summaryValue}>
-                            {totalCost.toFixed(2)} RSD
-                        </Text>
+                        <Text style={styles.summaryValue}>{totalCost.toFixed(2)} RSD</Text>
                     </View>
                     <View style={styles.summaryRow}>
                         <Text style={styles.summaryText}>Ukupno uplaćeno:</Text>
-                        <Text style={styles.summaryValue}>
-                            {totalPaid.toFixed(2)} RSD
-                        </Text>
+                        <Text style={styles.summaryValue}>{totalPaid.toFixed(2)} RSD</Text>
                     </View>
                     <View style={styles.summaryRow}>
                         <Text style={styles.summaryText}>Ukupno dugovanje:</Text>
@@ -126,35 +123,26 @@ export default function PaymentsScreen({ navigation, route }) {
                     </View>
                 </LinearGradient>
 
-                {/* Filter Button */}
-                <TouchableOpacity
-                    style={styles.filterButton}
-                    onPress={() => setFilterModalVisible(true)}
-                >
-                    <Ionicons
-                        name="filter-outline"
-                        size={18}
-                        color="#fff"
-                        style={styles.filterIcon}
-                    />
-                    <Text style={styles.filterButtonText}>
-                        {activeFilter
-                            ? `Filter: ${FILTER_LABELS[activeFilter]}`
-                            : 'Filtriraj'}
-                    </Text>
-                </TouchableOpacity>
+                {/* Filter Buttons */}
+                <View style={styles.filterWrapper}>
+                    {Object.entries(FILTER_LABELS).map(([status, label]) => (
+                        <FilterButton
+                            key={status}
+                            label={label}
+                            status={status}
+                            active={filterStatus}
+                            onPress={applyFilter}
+                        />
+                    ))}
+                </View>
 
-                {/* Enrollments List */}
-                {filteredEnrollments.length === 0 ? (
-                    <Text style={styles.noPayments}>
-                        Nema podataka za prikaz.
-                    </Text>
+                {/* Enrollment kartice */}
+                {filtered.length === 0 ? (
+                    <Text style={styles.noData}>Nema podataka za prikaz.</Text>
                 ) : (
-                    filteredEnrollments.map(item => {
-                        const paid = item.payments?.reduce(
-                            (s, p) => s + parseFloat(p.amount),
-                            0
-                        );
+                    filtered.map(item => {
+                        const paid =
+                            item.payments?.reduce((s, p) => s + parseFloat(p.amount), 0) || 0;
                         const debt = parseFloat(item.price) - paid;
                         return (
                             <LinearGradient
@@ -163,14 +151,8 @@ export default function PaymentsScreen({ navigation, route }) {
                                 style={styles.cardGradient}
                             >
                                 <View style={styles.cardHeader}>
-                                    <Ionicons
-                                        name="book-outline"
-                                        size={20}
-                                        color="#112E50"
-                                    />
-                                    <Text style={styles.course}>
-                                        {item.course?.name}
-                                    </Text>
+                                    <Ionicons name="book-outline" size={20} color="#112E50" />
+                                    <Text style={styles.course}>{item.course?.name}</Text>
                                 </View>
                                 <View style={styles.cardRow}>
                                     <Text style={styles.detail}>
@@ -181,22 +163,16 @@ export default function PaymentsScreen({ navigation, route }) {
                                     </Text>
                                 </View>
 
-                                {/* Individual Payments */}
                                 {item.payments && item.payments.length > 0 ? (
                                     item.payments.map(p => (
-                                        <View
-                                            key={p.id}
-                                            style={styles.paymentRow}
-                                        >
+                                        <View key={p.id} style={styles.paymentRow}>
                                             <Text style={styles.paymentDate}>
                                                 {p.payment_date.split(' ')[0]}
                                             </Text>
                                             <Text style={styles.paymentType}>
                                                 {PAYMENT_TYPE[p.type]}
                                             </Text>
-                                            <Text
-                                                style={styles.paymentAmount}
-                                            >
+                                            <Text style={styles.paymentAmount}>
                                                 +{parseFloat(p.amount).toFixed(2)} RSD
                                             </Text>
                                         </View>
@@ -208,9 +184,7 @@ export default function PaymentsScreen({ navigation, route }) {
                                 )}
 
                                 <View style={styles.cardFooter}>
-                                    <Text
-                                        style={[styles.amount, styles.debtValue]}
-                                    >
+                                    <Text style={[styles.amount, styles.debtValue]}>
                                         Dug: {debt.toFixed(2)} RSD
                                     </Text>
                                 </View>
@@ -219,67 +193,6 @@ export default function PaymentsScreen({ navigation, route }) {
                     })
                 )}
             </ScrollView>
-
-            {/* Filter Modal */}
-            <Modal
-                visible={filterModalVisible}
-                transparent
-                animationType="slide"
-            >
-                <View style={styles.modalBackground}>
-                    <View style={styles.modalContainer}>
-                        <Text style={styles.modalTitle}>
-                            Izaberi tip kursa:
-                        </Text>
-                        <View style={styles.pickerWrapper}>
-                            <Picker
-                                selectedValue={selectedType}
-                                onValueChange={val =>
-                                    setSelectedType(val)
-                                }
-                                style={styles.picker}
-                            >
-                                <Picker.Item
-                                    label="Svi kursevi"
-                                    value=""
-                                />
-                                <Picker.Item
-                                    label="Redovna nastava"
-                                    value="regular"
-                                />
-                                <Picker.Item
-                                    label="Pripremna nastava"
-                                    value="preparatory"
-                                />
-                                <Picker.Item label="Ostalo" value="other" />
-                            </Picker>
-                        </View>
-                        <View style={styles.modalButtons}>
-                            <Pressable
-                                style={styles.modalBtn}
-                                onPress={applyFilter}
-                            >
-                                <Text style={styles.modalBtnText}>
-                                    Primeni
-                                </Text>
-                            </Pressable>
-                            <Pressable
-                                style={[
-                                    styles.modalBtn,
-                                    styles.cancelBtn,
-                                ]}
-                                onPress={() =>
-                                    setFilterModalVisible(false)
-                                }
-                            >
-                                <Text style={styles.modalBtnText}>
-                                    Otkaži
-                                </Text>
-                            </Pressable>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
         </View>
     );
 }
@@ -292,14 +205,42 @@ const styles = StyleSheet.create({
     summaryText: { color: '#fff', fontSize: 16, marginLeft: 8, flex: 1 },
     summaryValue: { color: '#fff', fontSize: 16, fontWeight: '700' },
     debtValue: { color: '#fa0c24' },
-    filterButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#112E50', paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8, alignSelf: 'flex-start', marginBottom: 16 },
-    filterIcon: { marginRight: 6 },
-    filterButtonText: { color: '#fff', fontSize: 14, fontWeight: '600' },
-    noPayments: { textAlign: 'center', color: '#888', marginTop: 40 },
+
+    filterWrapper: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginVertical: 16,
+        paddingHorizontal: 16,
+    },
+    filterBtn: {
+        margin: 6,
+        paddingVertical: 8,
+        paddingHorizontal: 14,
+        borderRadius: 20,
+        backgroundColor: '#E0E0E0',
+    },
+    filterBtnActive: {
+        backgroundColor: '#4E6A8A',
+    },
+    filterBtnText: {
+        fontSize: 14,
+        color: '#4E6A8A',
+        fontWeight: '600',
+    },
+    filterBtnTextActive: {
+        color: '#fff',
+    },
+
     cardGradient: { borderRadius: 12, padding: 16, marginBottom: 12 },
     cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
     course: { fontSize: 16, fontWeight: '600', marginLeft: 8, color: '#112E50' },
-    cardRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
+    cardRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 12,
+    },
     detail: { fontSize: 14, color: '#555' },
     paymentRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 4 },
     paymentDate: { flex: 1, fontSize: 14, color: '#333' },
@@ -308,13 +249,5 @@ const styles = StyleSheet.create({
     noPaymentText: { fontSize: 14, color: '#888', marginBottom: 8 },
     cardFooter: { alignItems: 'flex-end', marginTop: 8 },
     amount: { fontSize: 16, fontWeight: '700', color: '#112E50' },
-    modalBackground: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
-    modalContainer: { backgroundColor: '#fff', width: '85%', borderRadius: 12, padding: 20 },
-    modalTitle: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
-    pickerWrapper: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, overflow: 'hidden', marginBottom: 24 },
-    picker: { height: 300, width: '100%'},
-    modalButtons: { flexDirection: 'row', justifyContent: 'space-between' },
-    modalBtn: { flex: 1, paddingVertical: 12, backgroundColor: '#112E50', borderRadius: 8, alignItems: 'center', marginHorizontal: 5 },
-    cancelBtn: { backgroundColor: '#888' },
-    modalBtnText: { color: '#fff', fontWeight: '600' },
+    noData: { textAlign: 'center', color: '#888', marginTop: 40 },
 });

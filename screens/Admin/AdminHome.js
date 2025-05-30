@@ -38,7 +38,7 @@ export default function AdminHome({ route, navigation }) {
             <Stack.Screen
                 name="ScanStudent"
                 component={ScanStudentScreen}
-                options={{ title: 'Skeniranje studenta' }}
+                options={{ title: 'Skeniranje prisustva' }}
             />
         </Stack.Navigator>
     );
