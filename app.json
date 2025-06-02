@@ -20,7 +20,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundler": "metro"
+      "bundler": "metro",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Aplikacija treba pristup kameri za skeniranje QR kodova"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -28,7 +31,10 @@
         "backgroundColor": "#ffffff",
         "bundler": "metro"
       },
-      "package": "com.crni89.myapp"
+      "package": "com.crni89.myapp",
+      "permissions": [
+        "CAMERA"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",

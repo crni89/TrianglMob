@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
     View,
     Text,
@@ -15,6 +15,13 @@ export default function ScanStudentScreen({ navigation, route }) {
     const [facing, setFacing] = useState("back");
     const [permission, requestPermission] = useCameraPermissions();
     const isProcessing = useRef(false);
+
+    // Čim se komponenta mount-uje, tražimo dozvolu ako je nemamo
+    useEffect(() => {
+        if (!permission) {
+            requestPermission();
+        }
+    }, [permission, requestPermission]);
 
     if (!permission) return <View style={styles.container} />;
     if (!permission.granted) {
@@ -33,18 +40,43 @@ export default function ScanStudentScreen({ navigation, route }) {
     const handleBarCodeScanned = ({ data }) => {
         if (isProcessing.current) return;
         isProcessing.current = true;
-        const studentId = data;
+
+        let parsed;
+        try {
+            parsed = JSON.parse(data);
+        } catch {
+            Alert.alert("Greška", "Neispravan format QR koda.");
+            isProcessing.current = false;
+            return;
+        }
+
+        const teacher_id = parsed.teacher_id != null ? parseInt(parsed.teacher_id, 10) : null;
+        const student_id = parsed.student_id != null ? parseInt(parsed.student_id, 10) : null;
+        const body = {
+            class_session_id: classSessionId,
+            status: "present",
+        };
+
+        if (teacher_id) {
+            body.teacher_id = teacher_id;
+        } else if (student_id) {
+            body.student_id = student_id;
+        } else {
+            Alert.alert("Greška", "QR kod ne sadrži ni teacher_id ni student_id.");
+            isProcessing.current = false;
+            return;
+        }
 
         api
-            .post("/attendance/change-attendance-status", {
-                class_session_id: classSessionId,
-                student_id: studentId,
-                status: "present",
+            .post("/attendance/change-attendance-status", body)
+            .then(() => {
+                const who = teacher_id ? "Nastavnik" : "Student";
+                const id = teacher_id || student_id;
+                Alert.alert("Uspeh", `${who} ${id} zabeležen.`);
             })
-            .then(() => Alert.alert("Uspeh", `Student ${studentId} zabeležen.`))
             .catch((err) => {
                 if (err.response?.status === 404) {
-                    Alert.alert("Greška", "Učenik nije prijavljen za ovaj čas.");
+                    Alert.alert("Greška", "Entitet nije prijavljen za ovaj čas.");
                 } else {
                     Alert.alert("Greška", err.response?.data?.message || "Neuspeh prilikom slanja.");
                 }
@@ -69,7 +101,7 @@ export default function ScanStudentScreen({ navigation, route }) {
                 onBarcodeScanned={handleBarCodeScanned}
             />
 
-            {/* Flip dugme apsolutno pozicionirano preko kamere */}
+            {/* Flip dugme */}
             <View style={styles.overlay}>
                 <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
                     <Text style={styles.flipText}>Flip</Text>

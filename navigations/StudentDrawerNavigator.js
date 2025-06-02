@@ -14,6 +14,7 @@ import React, { useContext } from 'react';
 import {createDrawerNavigator} from "@react-navigation/drawer";
 import { AuthContext } from '../context/AuthContext';
 import CustomDrawerContent from './CustomDrawerContent'
+import TestsScreen from "../screens/Student/TestsScreen";
 
 const Drawer = createDrawerNavigator();
 
@@ -113,7 +114,17 @@ export default function StudentDrawerNavigator({ route, navigation }) {
                     initialParams={{ user, profile }}
                     options={{
                         title: 'Zahtevi',
-                        drawerIcon: ({ size }) => <Ionicons name="send-outline" size={size} color="#fff" />
+                        drawerIcon: ({ size }) => <Ionicons name="send" size={size} color="#fff" />
+                    }}
+                />
+
+                <Drawer.Screen
+                    name="Testovi"
+                    component={TestsScreen}
+                    initialParams={{ user, profile }}
+                    options={{
+                        title: 'Testovi',
+                        drawerIcon: ({ size }) => <Ionicons name="document-text" size={size} color="#fff" />
                     }}
                 />
             </Drawer.Navigator>

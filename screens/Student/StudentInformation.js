@@ -40,7 +40,7 @@ export default function StudentProfileScreen({ navigation, route }) {
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
         parent_name: student.parent_name,
-        jmbg: student.jmbg,
+        parent_phone: student.parent_phone,
         phone: student.phone,
         primary_school: student.primary_school,
         grade: student.grade,
@@ -70,7 +70,7 @@ export default function StudentProfileScreen({ navigation, route }) {
             const s = res.data;
             setFormData({
                 parent_name: s.parent_name,
-                jmbg: s.jmbg,
+                parent_phone: s.parent_phone,
                 phone: s.phone,
                 primary_school: s.primary_school,
                 grade: s.grade,
@@ -161,9 +161,9 @@ export default function StudentProfileScreen({ navigation, route }) {
                     )}
                     {renderField(
                         <FontAwesome5 name="id-card" size={20} color="#555" />,
-                        'JMBG',
-                        formData.jmbg,
-                        'jmbg'
+                        'Broj roditelja',
+                        formData.parent_phone,
+                        'parent_phone'
                     )}
                     {renderField(
                         <MaterialIcons name="phone-android" size={20} color="#555" />,
