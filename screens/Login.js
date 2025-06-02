@@ -90,7 +90,7 @@ export default function LoginScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.triangleShape} />
+            <View/>
             <TouchableWithoutFeedback onPress={dismissKeyboard}>
                 <LinearGradient
                     colors={[COLORS.navy, COLORS.orange]}
@@ -175,17 +175,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: COLORS.white,
-    },
-    triangleShape: {
-        position: 'absolute',
-        width: 0,
-        height: 0,
-        borderLeftWidth: width * 0.7,
-        borderBottomWidth: height * 0.3,
-        borderLeftColor: 'transparent',
-        borderBottomColor: COLORS.navy,
-        top: 0,
-        left: 0,
     },
     gradient: {
         flex: 1,

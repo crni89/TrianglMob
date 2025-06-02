@@ -113,6 +113,12 @@ export default function ClassSessionRequestScreen({ navigation, route }) {
             </View>
         );
     }
+    const formatDate = (date) => {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${month}.${year}`;
+    };
 
     const marked = {};
     marked[date.toISOString().split('T')[0]] = { selected: true, selectedColor: '#4e54c8' };
@@ -133,7 +139,10 @@ export default function ClassSessionRequestScreen({ navigation, route }) {
                             style={[styles.option, selectedCourse === c.id && styles.selected]}
                             onPress={() => setSelectedCourse(c.id)}
                         >
-                            <Text style={styles.optionText}>{c.name}</Text>
+                            {/* <Text style={styles.optionText}>{c.name}</Text> */}
+                            <Text style={[styles.optionText, selectedCourse === c.id && styles.selected]}>
+                                {c.name}
+                            </Text>
                         </TouchableOpacity>
                     ))}
                 </View>
@@ -146,16 +155,28 @@ export default function ClassSessionRequestScreen({ navigation, route }) {
                             style={[styles.option, selectedTeacher === t.id && styles.selected]}
                             onPress={() => setSelectedTeacher(t.id)}
                         >
-                            <Text style={styles.optionText}>{t.full_name}</Text>
+                            {/* <Text style={styles.optionText}>{t.full_name}</Text> */}
+                            <Text style={[styles.optionText, selectedTeacher === t.id && styles.selected]}>
+                                {t.full_name}
+                            </Text>
                         </TouchableOpacity>
                     ))}
                 </View>
 
                 <Text style={styles.label}>Datum</Text>
+                {/* <Text style={styles.selectedDateText}>Izabrani datum: {formatDate(date)}</Text> */}
                 <Calendar
                     onDayPress={day => setDate(new Date(day.dateString))}
                     markedDates={marked}
                     theme={{ todayTextColor: '#4e54c8', selectedDayBackgroundColor: '#4e54c8' }}
+                    renderHeader={(date) => {
+                        const d = new Date(date);
+                        return (
+                        <Text style={{ fontSize: 18, fontWeight: 'semibold' }}>
+                            {formatDate(d)}
+                        </Text>
+                        );
+                    }}
                 />
 
                 <Text style={styles.label}>Početak časa</Text>
@@ -224,10 +245,10 @@ export default function ClassSessionRequestScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
     container: { padding: 16 },
-    label: { fontSize: 14, fontWeight: '600', marginTop: 12 },
-    dropdown: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 },
+    label: { fontSize: 14, fontWeight: '600', marginTop: 12, marginBottom: 12 },
+    dropdown: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 0 },
     option: { padding: 8, backgroundColor: '#fff', margin: 4, borderRadius: 6, borderWidth: 1, borderColor: '#ddd' },
-    selected: { backgroundColor: '#4e54c8', borderColor: '#4e54c8' },
+    selected: { backgroundColor: '#4e54c8', borderColor: '#4e54c8', color:"#fff" },
     optionText: { fontSize: 14, color: '#333' },
     timeRow: { flexDirection: 'row', marginTop: 8 },
     picker: { flex: 1, backgroundColor: '#fff' },

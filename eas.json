@@ -4,6 +4,17 @@
             "android": {
                 "buildType": "app-bundle"
             }
+        },
+        "preview": {
+            "android": {
+                "buildType": "apk"
+            },
+            "distribution": "internal"
+        },
+        "local": {
+            "android": {
+                "buildType": "apk"
+            }
         }
     }
 }

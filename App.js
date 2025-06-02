@@ -18,26 +18,26 @@ const RootStack = createNativeStackNavigator();
 
 export default function App() {
     return (
-               <AuthProvider>
-                  <NavigationContainer>
-            <SafeAreaProvider>
-                <RootStack.Navigator
-                    initialRouteName="Login"
-                    screenOptions={{ headerShown: false }}
-                >
-                    <RootStack.Screen name="Login" component={LoginScreen} />
-                    <RootStack.Screen name="Register" component={Register} />
-                    <RootStack.Screen name="FirstLogin" component={FirstLogin} />
-                    <RootStack.Screen name="Dashboard" component={RoleBasedNavigator} />
-                    <RootStack.Screen name="SessionStudents" component={SessionStudentsScreen} options={{ title: 'Učenici' }}
-                    />
-                    <RootStack.Screen name="StudentQRCode" component={StudentQRCode} options={{ title: 'QR Code' }}
-                    />
-                    <RootStack.Screen name="TeacherQRCode" component={TeacherQRCode} options={{ title: 'QR Code' }}
-                    />
-                </RootStack.Navigator>
-            </SafeAreaProvider>
-                 </NavigationContainer>
-   </AuthProvider>
-);
+        <AuthProvider>
+            <NavigationContainer>
+                <SafeAreaProvider>
+                    <RootStack.Navigator
+                        initialRouteName="Login"
+                        screenOptions={{ headerShown: false }}
+                    >
+                        <RootStack.Screen name="Login" component={LoginScreen} />
+                        <RootStack.Screen name="Register" component={Register} />
+                        <RootStack.Screen name="FirstLogin" component={FirstLogin} />
+                        <RootStack.Screen name="Dashboard" component={RoleBasedNavigator} />
+                        <RootStack.Screen name="SessionStudents" component={SessionStudentsScreen} options={{ title: 'Učenici' }}
+                        />
+                        <RootStack.Screen name="StudentQRCode" component={StudentQRCode} options={{ title: 'QR Code' }}
+                        />
+                        <RootStack.Screen name="TeacherQRCode" component={TeacherQRCode} options={{ title: 'QR Code' }}
+                        />
+                    </RootStack.Navigator>
+                </SafeAreaProvider>
+            </NavigationContainer>
+        </AuthProvider>
+    );
 }
