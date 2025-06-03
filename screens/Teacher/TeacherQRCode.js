@@ -13,6 +13,7 @@ import QRCode from "react-native-qrcode-svg";
 export default function TeacherQRCode({ navigation, route }) {
     const { teacher } = route.params;
     const teacherId = String(teacher.id);
+    const name = String(teacher.full_name);
 
     return (
         <SafeAreaView style={tw`flex-1 bg-gray-100`}>
@@ -41,7 +42,7 @@ export default function TeacherQRCode({ navigation, route }) {
                 <View style={tw`bg-white p-6 rounded-3xl shadow-xl items-center`}>
                     <View style={tw`bg-gray-100 p-4 rounded-xl mb-4`}>
                         <QRCode
-                            value={JSON.stringify({ teacher_id: teacherId })}
+                            value={JSON.stringify({ teacher_id: teacherId, teacher_name: name })}
                             size={250}
                             color="#112E50"
                             backgroundColor="#fff"

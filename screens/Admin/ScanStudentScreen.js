@@ -70,9 +70,9 @@ export default function ScanStudentScreen({ navigation, route }) {
         api
             .post("/attendance/change-attendance-status", body)
             .then(() => {
-                const who = teacher_id ? "Nastavnik" : "Student";
-                const id = teacher_id || student_id;
-                Alert.alert("Uspeh", `${who} ${id} zabeležen.`);
+                const who = teacher_id ? "Nastavnik" : "Učenik";
+                const name = parsed.teacher_name || parsed.student_name;
+                Alert.alert("Uspeh", `${who} ${name} zabeležen.`);
             })
             .catch((err) => {
                 if (err.response?.status === 404) {

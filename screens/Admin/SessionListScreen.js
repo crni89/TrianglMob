@@ -13,6 +13,7 @@ import tw from "twrnc";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import api from "../../api";
+import moment from "moment";
 
 export default function SessionListScreen({ navigation }) {
     const [allSessions, setAllSessions] = useState([]);   // sve sesije sa servera
@@ -178,7 +179,7 @@ export default function SessionListScreen({ navigation }) {
                                 {item.course?.name}
                             </Text>
                             <Text style={tw`text-gray-600 mt-1`}>
-                                {item.date} {item.start_time}–{item.end_time}
+                                {moment(item.date).format('DD.MM.YYYY.')} {moment(item.start_time, 'H:m:i').format('H:mm')}–{moment(item.end_time, 'H:m:i').format('H:mm')}
                             </Text>
                             <View style={tw`flex-row justify-between mt-2`}>
                                 <Text style={tw`text-gray-600`}>{item.location}</Text>
