@@ -1,6 +1,6 @@
 // front/screens/FirstLogin.js
 
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
     SafeAreaView,
     View,
@@ -14,8 +14,10 @@ import {
     Platform,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import api from '../api';
+import DropDownPicker from 'react-native-dropdown-picker';
+import { AuthContext } from '../context/AuthContext';
 
 const COLORS = {
     white: '#FFFFFF',
@@ -31,14 +33,37 @@ export default function FirstLoginScreen() {
     const { user } = useRoute().params;
 
     const [parentName, setParentName] = useState('');
-    const [jmbg, setJmbg] = useState('');
+    const [parentPhone, setParentPhone] = useState('');
     const [phone, setPhone] = useState('');
     const [primarySchool, setPrimarySchool] = useState('');
     const [birthDate, setBirthDate] = useState('');
+    const [gradeValue, setGradeValue] = useState('');
     const [loading, setLoading] = useState(false);
+    const gradeOptions = [
+        { label: 'Prvi razred – osnovna škola', value: 'prvi_os' },
+        { label: 'Drugi razred – osnovna škola', value: 'drugi_os' },
+        { label: 'Treći razred – osnovna škola', value: 'treci_os' },
+        { label: 'Četvrti razred – osnovna škola', value: 'cetvrti_os' },
+        { label: 'Peti razred – osnovna škola', value: 'peti_os' },
+        { label: 'Šesti razred – osnovna škola', value: 'sesti_os' },
+        { label: 'Sedmi razred – osnovna škola', value: 'sedmi_os' },
+        { label: 'Osmi razred – osnovna škola', value: 'osmi_os' },
+        { label: 'Prvi razred – srednja škola', value: 'prvi_ss' },
+        { label: 'Drugi razred – srednja škola', value: 'drugi_ss' },
+        { label: 'Treći razred – srednja škola', value: 'treci_ss' },
+        { label: 'Četvrti razred – srednja škola', value: 'cetvrti_ss' },
+        { label: 'Fakultet', value: 'fax' },
+
+    ];
+
+    const [gradeOpen, setGradeOpen] = useState(false);
+    const [gradeItems, setGradeItems] = useState(gradeOptions);
+
+
+    const { setUser, setProfile } = useContext(AuthContext);
 
     const handleComplete = async () => {
-        if (!parentName || !jmbg || !phone || !primarySchool || !birthDate) {
+        if (!parentName || !parentPhone || !phone || !primarySchool || !birthDate) {
             Alert.alert('Upozorenje', 'Sva polja su obavezna.');
             return;
         }
@@ -49,8 +74,9 @@ export default function FirstLoginScreen() {
             const postResp = await api.post('/student', {
                 user_id: user.id,
                 parent_name: parentName,
-                jmbg,
+                parent_phone: parentPhone,
                 phone,
+                grade: gradeValue,
                 primary_school: primarySchool,
                 birth_date: birthDate,
                 device_name: user.current_device || 'default_device',
@@ -63,7 +89,14 @@ export default function FirstLoginScreen() {
 
             // Dohvati profil studenta koristeći novi ID
             const { data: profile } = await api.get(`/student/${studentId}`);
-            navigation.replace('StudentHome', { user, profile });
+            setUser(user);
+            setProfile(profile);
+
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Dashboard' }],
+            });
+            // navigation.replace('StudentHome', { user, profile });
         } catch (err) {
             console.error(err);
             Alert.alert('Greška', err.response?.data?.message || err.message || 'Došlo je do greške.');
@@ -88,7 +121,7 @@ export default function FirstLoginScreen() {
             >
                 <ScrollView contentContainerStyle={styles.form}>
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Ime roditelja</Text>
+                        <Text style={styles.label}>Ime roditelja *</Text>
                         <TextInput
                             value={parentName}
                             onChangeText={setParentName}
@@ -99,20 +132,19 @@ export default function FirstLoginScreen() {
                     </View>
 
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>JMBG</Text>
+                        <Text style={styles.label}>Telefon roditelja</Text>
                         <TextInput
-                            value={jmbg}
-                            onChangeText={setJmbg}
-                            placeholder="13 cifara"
+                            value={parentPhone}
+                            onChangeText={setParentPhone}
+                            placeholder="Unesite broj telefona roditelja"
                             placeholderTextColor={COLORS.placeholder}
-                            keyboardType="number-pad"
-                            maxLength={13}
+                            keyboardType="phone-pad"
                             style={styles.input}
                         />
                     </View>
 
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Telefon</Text>
+                        <Text style={styles.label}>Telefon *</Text>
                         <TextInput
                             value={phone}
                             onChangeText={setPhone}
@@ -124,7 +156,7 @@ export default function FirstLoginScreen() {
                     </View>
 
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Osnovna škola</Text>
+                        <Text style={styles.label}>Škola *</Text>
                         <TextInput
                             value={primarySchool}
                             onChangeText={setPrimarySchool}
@@ -134,8 +166,49 @@ export default function FirstLoginScreen() {
                         />
                     </View>
 
+                    {/* Grade Dropdown */}
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Datum rođenja</Text>
+                        <Text style={styles.label}>Razred</Text>
+                        <DropDownPicker
+                            listMode="MODAL"
+                            open={gradeOpen}
+                            value={gradeValue}
+                            items={gradeItems}
+                            setOpen={setGradeOpen}
+                            setValue={setGradeValue}
+                            setItems={setGradeItems}
+                            placeholder="Izaberite razred"
+
+                            /* 1. Modal preko celog ekrana, ali podržava transparent pozadinu */
+                            modalProps={{
+                                animationType: 'fade',
+                                presentationStyle: 'overFullScreen'
+                            }}
+
+                            /* 2. Stil za kontejner modala (pozadina + centriranje sadržaja) */
+                            modalContentContainerStyle={{
+                                flex: 1,
+                                justifyContent: 'center',
+                                alignItems: 'flex',
+                            }}
+
+                            /* 3. Stil za samu listu stavki unutar modaļa */
+                            dropDownContainerStyle={{
+                                width: '80%',
+                                maxHeight: 250,
+                                borderRadius: 8,
+                                paddingVertical: 10,
+                            }}
+
+                            style={{
+                                borderRadius: 8,
+                            }}
+                        />
+
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Datum rođenja *</Text>
                         <TextInput
                             value={birthDate}
                             onChangeText={setBirthDate}
