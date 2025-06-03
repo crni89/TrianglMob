@@ -115,7 +115,7 @@ export default function SessionListScreen({ navigation }) {
                 end={[1, 0]}
             >
                 <Text style={tw`text-white text-xl font-bold mb-2`}>
-                    Datum: {date}
+                    Datum: {moment(date).format('DD.MM.YYYY.')}
                 </Text>
                 <Text style={tw`text-white text-xl font-bold mb-4`}>
                     Filteri
