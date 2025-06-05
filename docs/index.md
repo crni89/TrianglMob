@@ -34,3 +34,5 @@ User data is retained only as long as necessary to provide the services and comp
 If you have any questions regarding this privacy policy, feel free to contact us at:
 
 📧 **triangl.skolica@gmail.com**
+
+_Last updated: June 2025_
