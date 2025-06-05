@@ -2,8 +2,7 @@
     "build": {
         "production": {
             "android": {
-                "buildType": "app-bundle",
-                "versionCode": 2
+                "buildType": "app-bundle"
             }
         },
         "preview": {
