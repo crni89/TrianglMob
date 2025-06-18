@@ -3,6 +3,9 @@
         "production": {
             "android": {
                 "buildType": "app-bundle"
+            },
+            "ios": {
+                "buildType": "release"
             }
         },
         "preview": {

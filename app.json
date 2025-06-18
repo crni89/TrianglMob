@@ -4,11 +4,11 @@
     "slug": "Triangl",
     "version": "1.0.1",
     "orientation": "portrait",
-    "icon": "./assets/images/app-ico.png",
+    "icon": "./assets/images/ico_transparent.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/app-ico.png",
+      "image": "./assets/images/ico_transparent.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -27,7 +27,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/app-ico.png",
+        "foregroundImage": "./assets/images/ico_transparent.png",
         "backgroundColor": "#ffffff",
         "bundler": "metro"
       },
@@ -38,7 +38,7 @@
       ]
     },
     "web": {
-      "favicon": "./assets/images/app-ico.png",
+      "favicon": "./assets/images/ico_transparent.png",
       "bundler": "metro"
     },
     "owner": "crni89"
