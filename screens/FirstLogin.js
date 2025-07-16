@@ -18,6 +18,7 @@ import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import api from '../api';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { AuthContext } from '../context/AuthContext';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const COLORS = {
     white: '#FFFFFF',
@@ -36,7 +37,7 @@ export default function FirstLoginScreen() {
     const [parentPhone, setParentPhone] = useState('');
     const [phone, setPhone] = useState('');
     const [primarySchool, setPrimarySchool] = useState('');
-    const [birthDate, setBirthDate] = useState('');
+    const [birthDate, setBirthDate] = useState(new Date());
     const [gradeValue, setGradeValue] = useState('');
     const [loading, setLoading] = useState(false);
     const gradeOptions = [
@@ -62,6 +63,14 @@ export default function FirstLoginScreen() {
 
     const { setUser, setProfile } = useContext(AuthContext);
 
+    const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+
     const handleComplete = async () => {
         if (!parentName || !parentPhone || !phone || !primarySchool || !birthDate) {
             Alert.alert('Upozorenje', 'Sva polja su obavezna.');
@@ -78,7 +87,7 @@ export default function FirstLoginScreen() {
                 phone,
                 grade: gradeValue,
                 primary_school: primarySchool,
-                birth_date: birthDate,
+                birth_date: formatDate(birthDate),
                 device_name: user.current_device || 'default_device',
             });
 
@@ -209,12 +218,18 @@ export default function FirstLoginScreen() {
 
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Datum rođenja *</Text>
-                        <TextInput
+                        {/* <TextInput
                             value={birthDate}
                             onChangeText={setBirthDate}
                             placeholder="YYYY-MM-DD"
                             placeholderTextColor={COLORS.placeholder}
                             style={styles.input}
+                        /> */}
+                        <DateTimePicker display="spinner" value={birthDate} mode='date' onChange={(event, selectedDate) => {
+                                                                                            if (selectedDate) {
+                                                                                                setBirthDate(selectedDate);
+                                                                                            }
+                                                                                        }} 
                         />
                     </View>
 
