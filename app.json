@@ -35,7 +35,8 @@
       "package": "com.crni89.myapp",
       "permissions": [
         "CAMERA"
-      ]
+      ],
+      "edgeToEdge": true
     },
     "web": {
       "favicon": "./assets/ic_launcher.png",
