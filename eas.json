@@ -3,13 +3,18 @@
         "production": {
             "android": {
                 "buildType": "app-bundle"
+            },
+            "ios": {
+                "distribution": "store"
             }
         },
         "preview": {
             "android": {
                 "buildType": "apk"
             },
-            "distribution": "internal"
+            "ios": {
+                "distribution": "internal"
+            }
         },
         "local": {
             "android": {

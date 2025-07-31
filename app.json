@@ -21,8 +21,10 @@
     "ios": {
       "supportsTablet": true,
       "bundler": "metro",
+      "bundleIdentifier": "com.triangl.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "Aplikacija treba pristup kameri za skeniranje QR kodova"
+        "NSCameraUsageDescription": "Aplikacija treba pristup kameri za skeniranje QR kodova",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -31,7 +33,7 @@
         "backgroundColor": "#ffffff",
         "bundler": "metro"
       },
-      "versionCode": 7,
+      "versionCode": 8,
       "package": "com.crni89.myapp",
       "permissions": [
         "CAMERA"
