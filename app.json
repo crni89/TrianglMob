@@ -22,6 +22,7 @@
       "supportsTablet": true,
       "bundler": "metro",
       "bundleIdentifier": "com.triangl.app",
+      "buildNumber": "2",
       "infoPlist": {
         "NSCameraUsageDescription": "Aplikacija treba pristup kameri za skeniranje QR kodova",
         "ITSAppUsesNonExemptEncryption": false

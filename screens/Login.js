@@ -56,12 +56,8 @@ export default function LoginScreen() {
         try {
             const resp = await api.post('/login', { nameOrEmail, password });
             await AsyncStorage.setItem('token', resp.data.token);
+            api.defaults.headers.common['Authorization'] = `Bearer ${resp.data.token}`;
             const { user, firstLogin } = resp.data;
-
-            if (firstLogin) {
-                navigation.replace('FirstLogin', { user });
-                return;
-            }
 
             let profileData = null;
             if (user.role === 'student') {
@@ -72,13 +68,17 @@ export default function LoginScreen() {
                 profileData = teacherResp.data;
             }
 
+            await AsyncStorage.setItem('user', JSON.stringify(user));
+            await AsyncStorage.setItem('profile', JSON.stringify(profileData));
+
             setUser(user);
             setProfile(profileData);
 
-            navigation.reset({
-                index: 0,
-                routes: [{ name: 'Dashboard' }],
-            });
+            if (firstLogin) {
+                navigation.replace('FirstLogin', { user });
+            } else {
+                navigation.replace('Dashboard');
+            }
         } catch (err) {
             console.error(err);
             const msg = err.response?.data?.message || 'Došlo je do greške u prijavi';
@@ -87,6 +87,7 @@ export default function LoginScreen() {
             setLoading(false);
         }
     };
+
 
     return (
         <SafeAreaView style={styles.container}>
