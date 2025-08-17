@@ -117,6 +117,7 @@ export default function LoginScreen() {
                                 ref={emailRef}
                                 value={nameOrEmail}
                                 onChangeText={setNameOrEmail}
+                                testID="username"
                                 placeholder="Email ili korisničko ime"
                                 placeholderTextColor="#888"
                                 autoCapitalize="none"
@@ -136,6 +137,7 @@ export default function LoginScreen() {
                             <TextInput
                                 ref={passwordRef}
                                 value={password}
+                                testID='password'
                                 onChangeText={setPassword}
                                 placeholder="Lozinka"
                                 placeholderTextColor="#888"

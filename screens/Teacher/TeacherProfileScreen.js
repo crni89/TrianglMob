@@ -79,6 +79,7 @@ export default function TeacherProfileScreen({ navigation, route }) {
                     value={String(value)}
                     onChangeText={(text) => setFormData({ ...formData, [key]: text })}
                     keyboardType="numeric"
+                    maxLength={key === 'jmbg' ? 13 : undefined}
                 />
             ) : (
                 <Text style={styles.valueText}>{value}</Text>

@@ -1,25 +1,29 @@
 {
-    "build": {
-        "production": {
-            "android": {
-                "buildType": "app-bundle"
-            },
-            "ios": {
-                "distribution": "store"
-            }
-        },
-        "preview": {
-            "android": {
-                "buildType": "apk"
-            },
-            "ios": {
-                "distribution": "internal"
-            }
-        },
-        "local": {
-            "android": {
-                "buildType": "apk"
-            }
-        }
+  "build": {
+    "production": {
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "ios": {
+        "distribution": "store",
+        "autoIncrement": true
+      }
+    },
+    "preview": {
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "distribution": "internal"
+      }
+    },
+    "local": {
+      "android": {
+        "buildType": "apk"
+      }
     }
+  },
+  "cli": {
+    "appVersionSource": "remote"
+  }
 }
