@@ -35,7 +35,6 @@ export default function RateTeacherScreen({ navigation, route }) {
         try {
             const res = await api.get(`/teacher/${teacherId}/students`);
             setStudents(res.data)
-            console.log(res)
             // const enrollments = res.data.enrollments || [];
             // const unique = enrollments
             //     .flatMap(e => e.course?.teachers || [])
