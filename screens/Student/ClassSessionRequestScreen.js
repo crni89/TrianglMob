@@ -18,11 +18,11 @@ import api from '../../api';
 // Configure Serbian locale for calendar
 LocaleConfig.locales['sr'] = {
     monthNames: [
-        'Januar','Februar','Mart','April','Maj','Jun','Jul','Avgust','Septembar','Oktobar','Novembar','Decembar'
+        'Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun', 'Jul', 'Avgust', 'Septembar', 'Oktobar', 'Novembar', 'Decembar'
     ],
-    monthNamesShort: ['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Avg','Sep','Okt','Nov','Dec'],
-    dayNames: ['Nedelja','Ponedeljak','Utorak','Sreda','Četvrtak','Petak','Subota'],
-    dayNamesShort: ['Ned','Pon','Uto','Sre','Čet','Pet','Sub'],
+    monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Avg', 'Sep', 'Okt', 'Nov', 'Dec'],
+    dayNames: ['Nedelja', 'Ponedeljak', 'Utorak', 'Sreda', 'Četvrtak', 'Petak', 'Subota'],
+    dayNamesShort: ['Ned', 'Pon', 'Uto', 'Sre', 'Čet', 'Pet', 'Sub'],
     today: 'Danas'
 };
 LocaleConfig.defaultLocale = 'sr';
@@ -47,25 +47,72 @@ export default function ClassSessionRequestScreen({ navigation, route }) {
         fetchData();
     }, []);
 
+    // const fetchData = async () => {
+    //     setRefreshing(true);
+    //     try {
+    //         const res = await api.get(`/student/${student.id}/enrollments`);
+    //         const enrollments = res.data.enrollments || [];
+    //         const uniqCourses = [];
+    //         const uniqTeachers = [];
+    //         enrollments.forEach(e => {
+    //             if (e.course && !uniqCourses.some(c => c.id === e.course.id)) {
+    //                 uniqCourses.push(e.course);
+    //             }
+    //             e.course.teachers.forEach(t => {
+    //                 if (!uniqTeachers.some(x => x.id === t.id)) {
+    //                     uniqTeachers.push(t);
+    //                 }
+    //             });
+    //         });
+    //         setCourses(uniqCourses);
+    //         setTeachers(uniqTeachers);
+    //     } catch (err) {
+    //         console.error(err);
+    //         Alert.alert('Greška', 'Neuspešno učitavanje podataka');
+    //     } finally {
+    //         setLoading(false);
+    //         setRefreshing(false);
+    //     }
+    // };
+
     const fetchData = async () => {
         setRefreshing(true);
         try {
             const res = await api.get(`/student/${student.id}/enrollments`);
             const enrollments = res.data.enrollments || [];
+
             const uniqCourses = [];
             const uniqTeachers = [];
+
             enrollments.forEach(e => {
-                if (e.course && !uniqCourses.some(c => c.id === e.course.id)) {
-                    uniqCourses.push(e.course);
-                }
-                e.course.teachers.forEach(t => {
-                    if (!uniqTeachers.some(x => x.id === t.id)) {
-                        uniqTeachers.push(t);
+                if (e.course) {
+                    // dodaj kurs ako ne postoji
+                    if (!uniqCourses.some(c => c.id === e.course.id)) {
+                        uniqCourses.push({
+                            ...e.course,
+                            teachers: e.course.teachers || []
+                        });
                     }
-                });
+                    // dodaj svakog profesora sa kursevima
+                    e.course.teachers.forEach(t => {
+                        const existing = uniqTeachers.find(x => x.id === t.id);
+                        if (existing) {
+                            if (!existing.courses.some(c => c.id === e.course.id)) {
+                                existing.courses.push({ id: e.course.id, name: e.course.name });
+                            }
+                        } else {
+                            uniqTeachers.push({
+                                ...t,
+                                courses: [{ id: e.course.id, name: e.course.name }]
+                            });
+                        }
+                    });
+                }
             });
+
             setCourses(uniqCourses);
             setTeachers(uniqTeachers);
+
         } catch (err) {
             console.error(err);
             Alert.alert('Greška', 'Neuspešno učitavanje podataka');
@@ -75,9 +122,14 @@ export default function ClassSessionRequestScreen({ navigation, route }) {
         }
     };
 
+
     const handleSubmit = async () => {
         if (!selectedCourse || !selectedTeacher) {
             Alert.alert('Upozorenje', 'Izaberite kurs i profesora');
+            return;
+        }
+        if (!location.trim()) {
+            Alert.alert('Upozorenje', 'Lokacija je obavezna');
             return;
         }
         const start = startHour * 60 + startMinute;
@@ -93,8 +145,8 @@ export default function ClassSessionRequestScreen({ navigation, route }) {
                 course_id: selectedCourse,
                 teacher_id: selectedTeacher,
                 date: date.toISOString().split('T')[0],
-                start_time: `${String(startHour).padStart(2,'0')}:${String(startMinute).padStart(2,'0')}`,
-                end_time: `${String(endHour).padStart(2,'0')}:${String(endMinute).padStart(2,'0')}`,
+                start_time: `${String(startHour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}`,
+                end_time: `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`,
                 location,
             });
             Alert.alert('Uspeh', 'Zahtev je poslat');
@@ -103,6 +155,15 @@ export default function ClassSessionRequestScreen({ navigation, route }) {
             Alert.alert('Greška', 'Neuspešno slanje zahteva');
         } finally {
             setSubmitting(false);
+            setSelectedCourse(null);
+            setSelectedTeacher(null);
+            setDate(new Date());
+            setStartHour(new Date().getHours());
+            setStartMinute(0);
+            setEndHour((new Date().getHours() + 1) % 24);
+            setEndMinute(0)
+            setLocation('');
+            fetchData();
         }
     };
 
@@ -133,13 +194,22 @@ export default function ClassSessionRequestScreen({ navigation, route }) {
             >
                 <Text style={styles.label}>Kurs</Text>
                 <View style={styles.dropdown}>
-                    {courses.map(c => (
+                    {(selectedTeacher
+                        ? teachers.find(t => t.id === selectedTeacher)?.courses || []
+                        : courses
+                    ).map(c => (
                         <TouchableOpacity
                             key={c.id}
                             style={[styles.option, selectedCourse === c.id && styles.selected]}
-                            onPress={() => setSelectedCourse(c.id)}
+                            onPress={() => {
+                                if (selectedCourse === c.id) {
+                                    setSelectedCourse(null); 
+                                } else {
+                                    setSelectedCourse(c.id);
+                                }
+                            }}
+
                         >
-                            {/* <Text style={styles.optionText}>{c.name}</Text> */}
                             <Text style={[styles.optionText, selectedCourse === c.id && styles.selected]}>
                                 {c.name}
                             </Text>
@@ -147,21 +217,32 @@ export default function ClassSessionRequestScreen({ navigation, route }) {
                     ))}
                 </View>
 
+
                 <Text style={styles.label}>Profesor</Text>
                 <View style={styles.dropdown}>
-                    {teachers.map(t => (
+                    {(selectedCourse
+                        ? courses.find(c => c.id === selectedCourse)?.teachers || []
+                        : teachers
+                    ).map(t => (
                         <TouchableOpacity
                             key={t.id}
                             style={[styles.option, selectedTeacher === t.id && styles.selected]}
-                            onPress={() => setSelectedTeacher(t.id)}
+                            onPress={() => {
+                                if (selectedTeacher === t.id) {
+                                    setSelectedTeacher(null);
+                                } else {
+                                    setSelectedTeacher(t.id);
+                                }
+                            }}
+
                         >
-                            {/* <Text style={styles.optionText}>{t.full_name}</Text> */}
                             <Text style={[styles.optionText, selectedTeacher === t.id && styles.selected]}>
                                 {t.full_name}
                             </Text>
                         </TouchableOpacity>
                     ))}
                 </View>
+
 
                 <Text style={styles.label}>Datum</Text>
                 {/* <Text style={styles.selectedDateText}>Izabrani datum: {formatDate(date)}</Text> */}
@@ -172,9 +253,9 @@ export default function ClassSessionRequestScreen({ navigation, route }) {
                     renderHeader={(date) => {
                         const d = new Date(date);
                         return (
-                        <Text style={{ fontSize: 18, fontWeight: 'semibold' }}>
-                            {formatDate(d)}
-                        </Text>
+                            <Text style={{ fontSize: 18, fontWeight: 'semibold' }}>
+                                {formatDate(d)}
+                            </Text>
                         );
                     }}
                 />
@@ -187,7 +268,7 @@ export default function ClassSessionRequestScreen({ navigation, route }) {
                         onValueChange={setStartHour}
                     >
                         {hours.map(h => (
-                            <Picker.Item key={h} label={String(h).padStart(2,'0')} value={h} />
+                            <Picker.Item key={h} label={String(h).padStart(2, '0')} value={h} />
                         ))}
                     </Picker>
                     <Picker
@@ -196,7 +277,7 @@ export default function ClassSessionRequestScreen({ navigation, route }) {
                         onValueChange={setStartMinute}
                     >
                         {minutes.map(m => (
-                            <Picker.Item key={m} label={String(m).padStart(2,'0')} value={m} />
+                            <Picker.Item key={m} label={String(m).padStart(2, '0')} value={m} />
                         ))}
                     </Picker>
                 </View>
@@ -209,7 +290,7 @@ export default function ClassSessionRequestScreen({ navigation, route }) {
                         onValueChange={setEndHour}
                     >
                         {hours.map(h => (
-                            <Picker.Item key={h} label={String(h).padStart(2,'0')} value={h} />
+                            <Picker.Item key={h} label={String(h).padStart(2, '0')} value={h} />
                         ))}
                     </Picker>
                     <Picker
@@ -218,7 +299,7 @@ export default function ClassSessionRequestScreen({ navigation, route }) {
                         onValueChange={setEndMinute}
                     >
                         {minutes.map(m => (
-                            <Picker.Item key={m} label={String(m).padStart(2,'0')} value={m} />
+                            <Picker.Item key={m} label={String(m).padStart(2, '0')} value={m} />
                         ))}
                     </Picker>
                 </View>
@@ -228,6 +309,7 @@ export default function ClassSessionRequestScreen({ navigation, route }) {
                     style={styles.input}
                     placeholder="Unesite mesto..."
                     value={location}
+
                     onChangeText={setLocation}
                 />
 
@@ -248,7 +330,7 @@ const styles = StyleSheet.create({
     label: { fontSize: 14, fontWeight: '600', marginTop: 12, marginBottom: 12 },
     dropdown: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 0 },
     option: { padding: 8, backgroundColor: '#fff', margin: 4, borderRadius: 6, borderWidth: 1, borderColor: '#ddd' },
-    selected: { backgroundColor: '#4e54c8', borderColor: '#4e54c8', color:"#fff" },
+    selected: { backgroundColor: '#4e54c8', borderColor: '#4e54c8', color: "#fff" },
     optionText: { fontSize: 14, color: '#333' },
     timeRow: { flexDirection: 'row', marginTop: 8 },
     picker: { flex: 1, backgroundColor: '#fff' },
